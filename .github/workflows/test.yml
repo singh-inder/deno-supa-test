@@ -1,0 +1,55 @@
+name: Test
+on:
+  workflow_dispatch:
+
+jobs:
+  edge-functions-tests:
+    name: Edge Functions Testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: latest
+
+      - name: Pin Postgres version
+        run: |
+          mkdir -p supabase/.temp
+          echo "15.8.1.054" > supabase/.temp/postgres-version
+
+      - run: supabase start || exit 1
+
+      - run: cd supabase/functions && deno test --allow-all
+
+      - run: docker logs supabase_edge_runtime_"$(yq '.project_id' supabase/config.toml)"
+
+      # - name: Serve edge functions
+      #   run: |
+      #     supabase functions serve \
+      #       --env-file=./supabase/functions/.env.test \
+      #       --import-map=./deno.json \
+      #       | tee supabase-functions.log &
+      #     echo "Serving edge functions… pid=$!"
+
+      # - name: Wait for edge functions to be ready
+      #   run: |
+      #     echo "Waiting for Supabase Edge Functions to be ready..."
+      #     until grep -q "Using supabase-edge-runtime-" supabase-functions.log; do
+      #       sleep 0.5
+      #     done
+      #     echo "Supabase Edge Functions are ready!"
+
+      # - name: Wait for edge functions to start
+      #   run: sleep 10
+
+      # - name: Run edge-function tests
+      #   run: deno test --allow-all
+      #   working-directory: ./supabase/functions
