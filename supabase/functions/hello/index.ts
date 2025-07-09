@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
 
+console.log("TEST_URL", Deno.env.get("TEST_URL"));
+
 type PayloadType = { householdId: string; delayedTimeOfUseUpdateRequired?: boolean };
 
 // Modify the function to accept `tasks` as an argument, defaulting to the actual tasks module

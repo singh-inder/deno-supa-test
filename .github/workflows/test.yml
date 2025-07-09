@@ -27,7 +27,12 @@ jobs:
 
       - run: supabase start || exit 1
 
-      - run: cd supabase/functions && deno test --allow-all
+      - name: serve
+        run: |
+          cd supabase
+          nohup supabase functions serve --env-file .env.test &
+
+      - run: sleep 5 && cd supabase/functions && deno test --allow-all
 
       - run: docker logs supabase_edge_runtime_"$(yq '.project_id' supabase/config.toml)"
 
